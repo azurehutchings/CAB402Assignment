@@ -14,11 +14,13 @@ type Population = ScoredIndividual array
 // Find an individual within the population that has the highest fitness
 let fitest (population: Population) : ScoredIndividual =
     // TODO: add correct implementation here
+    //let max x y = if x > y then x else y
     raise (System.NotImplementedException "fitest")
 
 // Given a set of competeting individuals, return the winning individual (i.e. one with best fitness)
 let tournamentWinner (competitors: Population): Individual =
-    // TODO: add correct implementation here 
+    // TODO: add correct implementation here
+    //fitest competitors |> .Individual
     raise (System.NotImplementedException "tournamentWinner")
 
 // Randomly select an individual from a population by conducting a tournament.
