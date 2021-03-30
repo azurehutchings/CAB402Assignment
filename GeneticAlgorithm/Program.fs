@@ -38,7 +38,21 @@ let tournamentWinner (competitors: Population): Individual =
 // so it is possible that the same individual may be selected more than once.
 let tournamentSelect (population: Population) : Rand<Individual> =
     // TODO: add correct implementation here 
-    raise (System.NotImplementedException "tournamentSelect")
+    rand {
+        let! randomFirstIndividual = 
+            population
+            |> chooseRandom
+        let! randomSecondIndividual = 
+            population
+            |> chooseRandom
+        let competitors = [| randomFirstIndividual; randomSecondIndividual |]
+        let WinningIndividual = 
+            competitors
+            |> tournamentWinner
+        return {}
+    }
+
+    //raise (System.NotImplementedException "tournamentSelect")
 
 // Combine the genes of parent1 and parent2 based on the given splitPoint 
 // The splitpoint will always be between 1 and length-1, where length is the length of both parent genes)
