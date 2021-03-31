@@ -94,14 +94,16 @@ let cross (parent1: Individual) (parent2: Individual) : Rand<Individual> =
 // For example reverseMutateAt [0,3,5,4,2,1,6] 2 4 = [0,3,2,4,5,1,6]
 let reverseMutateAt (genes: Individual) (firstIndex: int) (secondIndex: int): Individual =
     // TODO: add correct implementation here 
-    let firstPart = genes.[..(firstIndex-1)]
+    let firstPart = 
+        genes.[..(firstIndex-1)]
     let secondPart = 
         genes.[firstIndex..secondIndex]
         |> Array.rev
-    let thirdPart = genes.[(secondIndex+1)..]
-    firstPart
-    |> Array.append secondPart
-    |> Array.append thirdPart
+    let thirdPart = 
+        genes.[(secondIndex+1)..]
+    let firstCombine = 
+        Array.append firstPart secondPart
+    Array.append firstCombine thirdPart
 
     //raise (System.NotImplementedException "reverseMutateAt")
 
@@ -109,7 +111,18 @@ let reverseMutateAt (genes: Individual) (firstIndex: int) (secondIndex: int): In
 // (such that 0 <= firstIndex < secondIndex < genes.length)
 let reverseMutate (chromosome: Individual): Rand<Individual> =
     // TODO: add correct implementation here 
-    raise (System.NotImplementedException "reverseMutate")
+    rand {
+        let maxInt = 
+            Array.length chromosome
+        let! firstIndex = 
+            intRange 0 (maxInt-1)
+        let! secondIndex = 
+            intRange (firstIndex + 1) (maxInt)
+        let genes = 
+            reverseMutateAt chromosome firstIndex secondIndex
+        return genes
+    }
+    //raise (System.NotImplementedException "reverseMutate")
 
 let MutateProbability = 0.15
 
