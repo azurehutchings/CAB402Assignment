@@ -67,15 +67,25 @@ let tournamentSelect (population: Population) : Rand<Individual> =
 // So the child in this example will be [0,3,5,4,6,2,1]
 let crossAt (parent1: Individual) (parent2: Individual) (splitPoint: int): Individual =
     // TODO: add correct implementation here
-    Array.append parent1.[..splitPoint] parent2
-
+    let firstPart = parent1.[..(splitPoint-1)]
+    let secondPart = Array.except firstPart parent2
+    Array.append firstPart secondPart
     //raise (System.NotImplementedException "crossAt")
 
 // Combine the genes of parent1 and parent2 at a randonly choosen splitpoint as per the above crossAt algorithm
 // The splitpoint is chosen so that both parents provide at least one gene to the child
 let cross (parent1: Individual) (parent2: Individual) : Rand<Individual> =
     // TODO: add correct implementation here 
-    raise (System.NotImplementedException "cross")
+    rand {
+        let maxInt = 
+            let arrayLength = Array.length parent1
+            if arrayLength > 1 then arrayLength - 1
+            else arrayLength
+        let! splitPoint = intRange 1 maxInt
+        let child = crossAt parent1 parent2 splitPoint
+        return child
+    }
+    //raise (System.NotImplementedException "cross")
 
 // Return a mutated version of the original genes
 // the sequence of genes is split into 3 sections, a start, middle and end, based on the 2 provided indexes
