@@ -130,7 +130,13 @@ let MutateProbability = 0.15
 // otherwise leave the sequence unaltered.
 let possiblyMutate (genes: Individual) : Rand<Individual> =
     // TODO: add correct implementation here 
-    raise (System.NotImplementedException "possiblyMutate")
+    rand {
+        let! mutate = 
+            withProbability MutateProbability
+        if mutate then return! reverseMutate genes
+        else return genes
+    }
+    //raise (System.NotImplementedException "possiblyMutate")
 
 // Create a new population that consists of all of the children, plus the 10 best individuals from the previous generation.
 let elitismSelection (parents: Population) (children: Population) : Population =
