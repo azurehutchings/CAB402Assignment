@@ -149,11 +149,21 @@ let elitismSelection (parents: Population) (children: Population) : Population =
 // Create a scored individual by applying the fitness function to assess the fitness of the given genes.
 let score (fitnessFunction:Individual->float) (genes: Individual) : ScoredIndividual =
     // TODO: add correct implementation here 
-    raise (System.NotImplementedException "fitnessFunction")
+    let fitness =
+        fitnessFunction genes
+    (genes, fitness)
+    //raise (System.NotImplementedException "fitnessFunction")
 
 // Randomly generate a population containing the specified number of individuals, each with the specified number of genes.
 let randomIndividuals (fitnessFunction:Individual->float) (numberGenes:int) (numberIndividuals:int)  : Rand<Population> =
     // TODO: add correct implementation here 
+    //rand {
+    //    let! population = 
+    //        [0..numberIndividuals]
+    //        |> List.iter
+    //        let! genes = randArrayInit numberGenes
+    //    return population
+    //}
     raise (System.NotImplementedException "randomIndividuals")
 
 // Generate a child by first randomly choosing two parents using tournament selection,
@@ -162,7 +172,16 @@ let randomIndividuals (fitnessFunction:Individual->float) (numberGenes:int) (num
 // so there is a small chance that the same individual may be choosen twice.
 let procreate fitnessFunction (population: Population) : Rand<ScoredIndividual> =
     // TODO: add correct implementation here 
-    raise (System.NotImplementedException "procreate")
+    rand{
+        let! parent1 = tournamentSelect population
+        let! parent2 = tournamentSelect population
+        let! child = cross parent1 parent2
+        let! mutatedChild = possiblyMutate child
+        let scoredChild = score fitnessFunction mutatedChild
+        return scoredChild
+    }
+
+    //raise (System.NotImplementedException "procreate")
 
 // Create a new generation by creating the specified number of children through procreation and then 
 // applying elitism selection to create the population of the next generation
