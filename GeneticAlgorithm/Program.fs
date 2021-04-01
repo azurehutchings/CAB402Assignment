@@ -157,14 +157,12 @@ let score (fitnessFunction:Individual->float) (genes: Individual) : ScoredIndivi
 // Randomly generate a population containing the specified number of individuals, each with the specified number of genes.
 let randomIndividuals (fitnessFunction:Individual->float) (numberGenes:int) (numberIndividuals:int)  : Rand<Population> =
     // TODO: add correct implementation here 
-    //rand {
-    //    let! population = 
-    //        [0..numberIndividuals]
-    //        |> List.iter
-    //        let! genes = randArrayInit numberGenes
-    //    return population
-    //}
-    raise (System.NotImplementedException "randomIndividuals")
+    rand {
+        let! groupIndividuals = randArrayInit numberIndividuals (fun elem -> shuffle [|0..numberGenes-1|])
+        let population = Array.map (fun genes -> score fitnessFunction genes) groupIndividuals
+        return population
+    }
+    //raise (System.NotImplementedException "randomIndividuals")
 
 // Generate a child by first randomly choosing two parents using tournament selection,
 // cross their genes and then optionally mutate the resulting genes.
