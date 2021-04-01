@@ -141,7 +141,10 @@ let possiblyMutate (genes: Individual) : Rand<Individual> =
 // Create a new population that consists of all of the children, plus the 10 best individuals from the previous generation.
 let elitismSelection (parents: Population) (children: Population) : Population =
     // TODO: add correct implementation here 
-    raise (System.NotImplementedException "elitismSelection")
+    let tenBest = 
+        Array.sortByDescending snd parents
+    Array.append children tenBest.[..9]
+    //raise (System.NotImplementedException "elitismSelection")
 
 // Create a scored individual by applying the fitness function to assess the fitness of the given genes.
 let score (fitnessFunction:Individual->float) (genes: Individual) : ScoredIndividual =
