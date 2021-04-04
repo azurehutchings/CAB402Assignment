@@ -197,7 +197,16 @@ let evolveOneGeneration fitnessFunction (parentPopulation: Population) (childPop
 // Due to elitism selection, the fitest individual in each succcessive generation should be at least as good as the previous generation. 
 let evolveForever fitnessFunction (initialPopulation: Population) (childPopulationLimit: int): Rand<ScoredIndividual seq> =
     // TODO: add correct implementation here 
-    raise (System.NotImplementedException "evolveForever")
+    rand {
+        let! newGeneration = 
+            randSeqUnfold (fun state -> 
+                let newPopulation = evolveOneGeneration fitnessFunction state childPopulationLimit
+                let fitestIndividual = evaluateWith newPopulation |> fitest
+                (fitestIndividual, newPopulation)
+            ) (initialPopulation)
+        return newGeneration
+    }
+    //raise (System.NotImplementedException "evolveForever")
 
 let Optimize fitnessFunction numberOfGenes numerOfIndividuals: ScoredIndividual seq =
     let solutions =
