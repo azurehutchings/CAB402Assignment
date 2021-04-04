@@ -185,7 +185,12 @@ let procreate fitnessFunction (population: Population) : Rand<ScoredIndividual> 
 // applying elitism selection to create the population of the next generation
 let evolveOneGeneration fitnessFunction (parentPopulation: Population) (childPopulationLimit: int) : Rand<Population> =
     // TODO: add correct implementation here 
-    raise (System.NotImplementedException "evolveOneGeneration")
+    rand {
+        let! childPopulation = randArrayInit childPopulationLimit (fun elem -> procreate fitnessFunction parentPopulation)
+        let population = elitismSelection parentPopulation childPopulation
+        return population
+    }
+    //raise (System.NotImplementedException "evolveOneGeneration")
 
 // Starting with the specified initial population, evolve generation by generation (forever).
 // For each population, we determine the fitest individual from that generation and return an infinite sequence of these individuals.
