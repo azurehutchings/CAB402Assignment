@@ -199,9 +199,9 @@ let evolveForever fitnessFunction (initialPopulation: Population) (childPopulati
     // TODO: add correct implementation here 
     rand {
         let! newGeneration = 
-            randSeqUnfold (fun state -> 
+            randSeqUnfold (fun state ->
                 let newPopulation = evolveOneGeneration fitnessFunction state childPopulationLimit
-                let fitestIndividual = evaluateWith newPopulation |> fitest
+                let fitestIndividual = fitest state
                 (fitestIndividual, newPopulation)
             ) (initialPopulation)
         return newGeneration
