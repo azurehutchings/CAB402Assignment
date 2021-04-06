@@ -14,7 +14,7 @@ type Population = ScoredIndividual array
 // Find an individual within the population that has the highest fitness
 let fitest (population: Population) : ScoredIndividual =
     // TODO: add correct implementation here
-    let max x y = if (snd x) > (snd y) then x else y
+    let max x y = if (snd x) >= (snd y) then x else y
     population
     |> Array.toList
     |> List.reduce max
