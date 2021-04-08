@@ -53,7 +53,11 @@ let earliestStart (alreadyScheduledEvents: ScheduledEvent list) (nextEvent:Event
     // rather than up to 41 if every possible start point needed to be considered.
     let possibleStartTimes: Time list = 
         // TODO: add correct implementation here
-        raise (System.NotImplementedException "possibleStartTimes")
+        alreadyScheduledEvents 
+        |> List.map (fun elem -> elem.finishTime)
+        |> List.sort
+        |> List.append [0]
+        //raise (System.NotImplementedException "possibleStartTimes")
 
     // Similarly, when checking if the next event can start at some time t0, in theory we need to check that the age group and 
     // proposed location resource are available at all time t such that t0 <= t < t0 + duration.
@@ -65,7 +69,57 @@ let earliestStart (alreadyScheduledEvents: ScheduledEvent list) (nextEvent:Event
     // we can be sure that the required resources are actually available at all times within that range. 
 
     // TODO: add correct implementation here
-    raise (System.NotImplementedException "earliestStart")
+    let checkTime currentTime =
+        alreadyScheduledEvents
+        |> List.filter (fun elem -> 
+            if (elem.startTime < (currentTime + nextEvent.duration)) && (elem.finishTime > currentTime) then 
+                true
+            else false)
+
+    let checkAgeGroup currentTime = 
+        checkTime currentTime
+        |> List.exists (fun elem -> 
+            if (elem.event.ageGroup.Equals(nextEvent.ageGroup) )then
+                true
+            else 
+                false)
+
+    let collateResources currentTime =
+        checkTime currentTime
+        |> List.filter (fun elem ->
+            if (nextEvent.location.Equals(elem.event.location)) then
+                true
+            else false )
+
+    let numberResourcesInUse currentTime = 
+        collateResources currentTime 
+        |> List.length
+
+    let checkResources currentTime =
+        if (numberResourcesInUse currentTime) < (nextEvent.location|> resourceAvailable) then
+            true
+        else
+            false
+  
+    let time = 
+        possibleStartTimes
+        |> List.find (fun elem -> 
+            if (checkResources elem && checkAgeGroup elem = false) then
+                true
+            else false
+            )
+
+    let allocation = 
+        let allocatedResources = 
+            collateResources time
+            |> List.map (fun elem -> elem.allocated)
+        let max = nextEvent.location|> resourceAvailable
+        [1..max]
+        |> List.except allocatedResources
+        |> List.head
+
+    (time, allocation)
+    //raise (System.NotImplementedException "earliestStart")
 
 // We schedule events one by one. At any given state we have a set of events that have already been scheduled and
 // some event that is next to be scheduled. We determine the earliest possible start time for that next event and 

@@ -16,8 +16,7 @@ let fitest (population: Population) : ScoredIndividual =
     // TODO: add correct implementation here
     let max x y = if (snd x) >= (snd y) then x else y
     population
-    |> Array.toList
-    |> List.reduce max
+    |> Array.reduce max
     //let zero = ([| 0; 0; 0 |],0.0)
     //let list = Array.toList population
     //List.fold max zero list
