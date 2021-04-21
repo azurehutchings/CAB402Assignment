@@ -17,10 +17,6 @@ let fitest (population: Population) : ScoredIndividual =
     let max x y = if (snd x) >= (snd y) then x else y
     population
     |> Array.reduce max
-    //let zero = ([| 0; 0; 0 |],0.0)
-    //let list = Array.toList population
-    //List.fold max zero list
-    //let result = list |> List.head
     //raise (System.NotImplementedException "fitest")
 
 // Given a set of competeting individuals, return the winning individual (i.e. one with best fitness)

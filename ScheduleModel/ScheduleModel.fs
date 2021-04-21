@@ -57,6 +57,7 @@ let earliestStart (alreadyScheduledEvents: ScheduledEvent list) (nextEvent:Event
         |> List.map (fun elem -> elem.finishTime)
         |> List.sort
         |> List.append [0]
+        |> List.distinct
         //raise (System.NotImplementedException "possibleStartTimes")
 
     // Similarly, when checking if the next event can start at some time t0, in theory we need to check that the age group and 
@@ -69,54 +70,53 @@ let earliestStart (alreadyScheduledEvents: ScheduledEvent list) (nextEvent:Event
     // we can be sure that the required resources are actually available at all times within that range. 
 
     // TODO: add correct implementation here
-    let checkTime currentTime =
+    let returnOverlappingSchedules currentTime =
+        let finishTime = 
+            currentTime + nextEvent.duration
         alreadyScheduledEvents
         |> List.filter (fun elem -> 
-            if (elem.startTime < (currentTime + nextEvent.duration)) && (elem.finishTime > currentTime) then 
+            if (elem.startTime < finishTime) && (elem.finishTime > currentTime) then 
                 true
             else false)
 
-    let checkAgeGroup currentTime = 
-        checkTime currentTime
+    let checkAgeGroup overlappingEvents = 
+        overlappingEvents
         |> List.exists (fun elem -> 
-            if (elem.event.ageGroup.Equals(nextEvent.ageGroup) )then
+            if (elem.event.ageGroup.Equals(nextEvent.ageGroup))then
                 true
             else 
                 false)
 
-    let collateResources currentTime =
-        checkTime currentTime
-        |> List.filter (fun elem ->
-            if (nextEvent.location.Equals(elem.event.location)) then
-                true
-            else false )
+    let availableAllocation overlappingEvents =
+        let nonAllocatedResources = 
+            overlappingEvents
+            |> List.filter (fun elem -> (nextEvent.location = elem.event.location))
+            |> List.map (fun elem -> elem.allocated)
+        let max = nextEvent.location |> resourceAvailable
+        let availableAllocations =
+            [1..max]
+            |> List.except nonAllocatedResources
+        if (List.isEmpty availableAllocations) then
+            0
+        else availableAllocations |> List.head
 
-    let numberResourcesInUse currentTime = 
-        collateResources currentTime 
-        |> List.length
-
-    let checkResources currentTime =
-        if (numberResourcesInUse currentTime) < (nextEvent.location|> resourceAvailable) then
+    let checkStartTime currentTime =
+        let overlappingEvents = 
+            currentTime 
+            |> returnOverlappingSchedules
+        if (availableAllocation overlappingEvents > 0) && (checkAgeGroup overlappingEvents = false) then
             true
-        else
-            false
+        else false
   
     let time = 
         possibleStartTimes
-        |> List.find (fun elem -> 
-            if (checkResources elem && checkAgeGroup elem = false) then
-                true
-            else false
-            )
+        |> List.find (fun elem -> checkStartTime elem)
 
     let allocation = 
-        let allocatedResources = 
-            collateResources time
-            |> List.map (fun elem -> elem.allocated)
-        let max = nextEvent.location|> resourceAvailable
-        [1..max]
-        |> List.except allocatedResources
-        |> List.head
+        let overlappingEvents = 
+            time 
+            |> returnOverlappingSchedules
+        availableAllocation overlappingEvents
 
     (time, allocation)
     //raise (System.NotImplementedException "earliestStart")
@@ -126,13 +126,39 @@ let earliestStart (alreadyScheduledEvents: ScheduledEvent list) (nextEvent:Event
 // add it to the list of scheduled events.
 let scheduleNext (alreadyScheduled: ScheduledEvent list) (nextEvent: Event): ScheduledEvent list =
     // TODO: add correct implementation here
-    raise (System.NotImplementedException "scheduleNext")
+    let startTime = 
+        earliestStart alreadyScheduled nextEvent
+        |> fst
+
+    let finishTime = 
+        startTime + nextEvent.duration
+
+    let allocated = 
+        earliestStart alreadyScheduled nextEvent
+        |> snd
+
+    let newlyScheduledEvent = 
+        {event= nextEvent; startTime = startTime; finishTime = finishTime; allocated = allocated}
+
+    [newlyScheduledEvent]
+    |> List.append alreadyScheduled
+    //raise (System.NotImplementedException "scheduleNext")
 
 // Given a set of events to be scheduled, we schedule them one by one, with the order of scheduling determined by the specified order array.
 // the first event to be scheduled will be events[order[0]], followed by events[order[1]], etc, until we have a completely scheduled set of events.
 let schedule (events: Event array) (order: int array) : ScheduledEvent list =
-    // TODO: add correct implementation here 
-    raise (System.NotImplementedException "schedule")
+    // TODO: add correct implementation here
+    let scheduledEvents = []
+
+    let orderedEvents = 
+        order 
+        |> Array.map (fun elem -> events.[elem])
+        |> Array.toList
+
+    orderedEvents
+    |> List.fold (fun alreadyScheduled elem -> 
+        scheduleNext alreadyScheduled elem ) scheduledEvents
+    //raise (System.NotImplementedException "schedule")
 
 // Return a cost function that we rank the fitness of a particular event scheduling order    
 let athleticsScheduleCost (events: Event array) =
@@ -140,6 +166,14 @@ let athleticsScheduleCost (events: Event array) =
         // We first schedule the events using the specified event order and then determine how long it will take to conduct all events (i.e. the finish time of the latest finishing event).
         // Since for a fitness function normally produces a higher value for a better solution, we take the negative of the finish time.
         // For example, if the finish time of our latest event is 181 minutes, then our fitness function would return -181.0
-        // TODO: add correct implementation here 
-        raise (System.NotImplementedException "fitnessFunction")
+        // TODO: add correct implementation here
+        let max x y = if (x.finishTime) >= (y.finishTime) then x else y
+        let lastEvent = 
+            schedule events order
+            |> List.reduce max
+        let fitness = 
+            lastEvent.finishTime
+            |> float
+        - fitness
+        //raise (System.NotImplementedException "fitnessFunction")
     fitnessFunction
